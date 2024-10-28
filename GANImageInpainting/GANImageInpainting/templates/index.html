@@ -11,34 +11,43 @@
     <div>
         <input type="file" name="image" id="image-input" accept="image/*">
     </div>
+    <div class="container">
 
-    <div id="uploaded-image">
-        <img id="image-preview" src="">
-        <canvas id="drawing-canvas"></canvas>
-    </div>
+        <div id="prep">
+            <div id="uploaded-image">
+                <img id="image-preview" src="">
+                <canvas id="drawing-canvas"></canvas>
+            </div>
 
-    <div id="tools">
-        <button id="free-draw">Free Draw</button>
-        <button id="lasso-tool">Lasso Tool</button>
-        <button id="eraser">Eraser</button>
-        <label for="brush-size">Brush Size:</label>
-        <input type="range" id="brush-size" min="1" max="10" value="2">
-        <button id="clear-canvas">Clear</button>
-    </div>
-    <div>
-        <button type="button" id="inpaint">Inpaint</button>
-    </div>
-
-    <div class="slider-container">
-        <img id="before-image" src="" draggable="false">
-        <div id="result" class="after-image-container">
-            <img id="inpainted-image" class="after-image" src="" alt="Inpainted image will appear here" draggable="false">
+            <div id="tools">
+                <div>
+                    <button id="free-draw">Free Draw</button>
+                    <button id="lasso-tool">Lasso Tool</button>
+                    <button id="eraser">Eraser</button>
+                </div>
+                <div>
+                    <label for="brush-size">Brush Size:</label>
+                    <input type="range" id="brush-size" min="1" max="10" value="2">
+                    <button id="clear-canvas">Clear</button>
+                </div>
+            </div>
+            <div>
+                <button type="button" id="inpaint">Inpaint</button>
+            </div>
         </div>
-        <div class="slider-handle"></div>
+
+        <div id="res">
+            <div class="slider-container">
+                <img id="before-image" src="" draggable="false">
+                <div id="result" class="after-image-container">
+                    <img id="inpainted-image" class="after-image" src="" alt="Inpainted image will appear here" draggable="false">
+                </div>
+                <div class="slider-handle"></div>
+            </div>
+            <div>
+                <button id="download-button">Download Inpainted Image</button>
+            </div>
+        </div>
     </div>
-    <div>
-        <button id="download-button">Download Inpainted Image</button>
-    </div>
-    <div class="footer"></div>
 </body>
 </html>

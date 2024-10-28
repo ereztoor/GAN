@@ -9,7 +9,9 @@ const before = document.getElementById('before-image');
 const drawingCanvas = document.getElementById('drawing-canvas');
 const tools = document.getElementById('tools');
 const context = drawingCanvas.getContext('2d');
-const download = document.getElementById('download-button')
+const download = document.getElementById('download-button');
+const res = document.getElementById('res');
+const prep = document.getElementById('prep');
 let isDrawing = false;
 let points = [];
 let currentTool = 'free-draw'; // Default to free draw
@@ -22,6 +24,22 @@ function updateCanvasSize() {
     drawingCanvas.height = imageRect.height;
 }
 
+function resize(imageSource, width, height) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const resizedImageBase64 = canvas.toDataURL('image/png');
+            resolve(resizedImageBase64);
+        };
+        img.src = imageSource;
+    });
+}
+
 // Set up image and canvas
 imageInput.addEventListener('change', () => {
     const file = imageInput.files[0];
@@ -31,10 +49,7 @@ imageInput.addEventListener('change', () => {
             uploadedImageBase64 = e.target.result;
             imagePreview.src = uploadedImageBase64;
             before.src = uploadedImageBase64;
-            imagePreview.style.display = 'block';
-            inpaintButton.style.display = 'inline-block';
-            uploadedImage.style.display = 'inline-block';
-            tools.style.display = 'block';
+            prep.style.display = 'flex';
             imagePreview.onload = updateCanvasSize;
         };
         reader.readAsDataURL(file);
@@ -92,22 +107,29 @@ drawingCanvas.addEventListener('mousedown', (e) => {
 });
 
 // Continue drawing
-drawingCanvas.addEventListener('mousemove', (e) => {
+window.addEventListener('mousemove', (e) => {
     if (!isDrawing) return;
-    const { offsetX, offsetY } = e;
+
+    const rect = drawingCanvas.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    // Ensure the coordinates stay within the canvas bounds
+    const x = Math.max(0, Math.min(offsetX, drawingCanvas.width));
+    const y = Math.max(0, Math.min(offsetY, drawingCanvas.height));
 
     if (currentTool === 'free-draw') {
-        context.lineTo(offsetX, offsetY);
+        context.lineTo(x, y);
         context.lineWidth = brushSize;
         context.strokeStyle = 'red'; // Normal color for drawing
         context.stroke();
     } else if (currentTool === 'eraser') {
-        context.lineTo(offsetX, offsetY);
+        context.lineTo(x, y);
         context.lineWidth = brushSize; // Keep the brush size for eraser
         context.stroke();
     } else if (currentTool === 'lasso-tool') {
-        points.push({ x: offsetX, y: offsetY });
-        context.lineTo(offsetX, offsetY);
+        points.push({ x, y });
+        context.lineTo(x, y);
         context.lineWidth = 2;
         context.strokeStyle = 'red';
         context.stroke();
@@ -115,7 +137,6 @@ drawingCanvas.addEventListener('mousemove', (e) => {
 });
 
 // Finish drawing
-
 function stopDrawing() {
     isDrawing = false;
     document.body.classList.remove('no-select');
@@ -182,24 +203,30 @@ download.addEventListener('click', function () {
 });
 
 // Handle form submission to send mask and image to the server
-inpaintButton.addEventListener('click', () => {
-    // Get the mask from the drawing canvas
-    const maskCanvas = drawingCanvas.toDataURL('image/png');
+inpaintButton.addEventListener('click', async () => {
+    // Resize the mask to 128x128
+    const resizedMaskBase64 = await resize(drawingCanvas.toDataURL('image/png'), 128, 128);
+
+    // Resize the uploaded image to 128x128
+    const resizedImageBase64 = await resize(uploadedImageBase64, 128, 128);
 
     const formData = new FormData();
-    formData.append("image_base64", uploadedImageBase64);
-    formData.append("mask_base64", maskCanvas); // Send the mask
+    formData.append("image_base64", resizedImageBase64);
+    formData.append("mask_base64", resizedMaskBase64); // Send the mask
 
-    fetch('/inpaint2', {
+    fetch('/inpaint', {
         method: 'POST',
         body: formData
     })
         .then(response => response.blob())
         .then(blob => {
             const url = URL.createObjectURL(blob);
-            inpaintedImage.src = url;
-            result.style.display = 'block';
-            sliderContainer.style.display = 'inline-block';
-            download.style.display = 'inline-block';
+            const imageRect = imagePreview.getBoundingClientRect();
+
+            // Resize the inpainted image back to original preview dimensions
+            resize(url, imageRect.width, imageRect.height).then(resizedUrl => {
+                inpaintedImage.src = resizedUrl;
+                res.style.display = 'flex';
+            });
         });
 });

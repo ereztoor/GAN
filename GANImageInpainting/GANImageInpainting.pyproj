@@ -27,6 +27,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GANImageInpainting\inpainting.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="runserver.py" />
     <Compile Include="GANImageInpainting\views.py">
       <SubType>Code</SubType>
@@ -45,6 +48,14 @@
     <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="GANImageInpainting\" />
+    <Folder Include="GANImageInpainting\static\content\" />
+    <Folder Include="models\" />
+    <Folder Include="GANImageInpainting\static\scripts\" />
+    <Folder Include="GANImageInpainting\templates\" />
+    <Folder Include="GANImageInpainting\static\" />
+  </ItemGroup>
+  <ItemGroup>
     <Interpreter Include="env\">
       <Id>env</Id>
       <Version>0.0</Version>
@@ -54,14 +65,6 @@
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
       <Architecture>X64</Architecture>
     </Interpreter>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GANImageInpainting\" />
-    <Folder Include="GANImageInpainting\static\content\" />
-    <Folder Include="GANImageInpainting\static\models\" />
-    <Folder Include="GANImageInpainting\static\scripts\" />
-    <Folder Include="GANImageInpainting\templates\" />
-    <Folder Include="GANImageInpainting\static\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Web.targets" />
   <!-- Specify pre- and post-build commands in the BeforeBuild and 
